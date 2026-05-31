@@ -10,3 +10,6 @@ Thumbs.db
 
 # Node dependencies
 node_modules/
+
+# Generated HTML comparisons
+expert-comparison.html

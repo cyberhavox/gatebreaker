@@ -1,0 +1,17 @@
+# Version control
+.git/
+.github/
+.gitignore
+
+# Generated simulation files
+expert-comparison.html
+
+# Package lock
+package-lock.json
+
+# Local configurations / IDEs
+.idea/
+.vscode/
+.gemini/
+*.log
+npm-debug.log*
