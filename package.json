@@ -28,7 +28,6 @@
   "author": "Raghav Gupta (@cyberhavox) & Kashish Kanojia (@cyberfascinate)",
   "license": "MIT",
   "dependencies": {
-    "cybersec-career-coach": "^1.0.8",
     "picocolors": "^1.0.0",
     "prompts": "^2.4.2"
   },
