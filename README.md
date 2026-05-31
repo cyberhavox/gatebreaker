@@ -1,4 +1,4 @@
-# 🔐 Cybersec Career Coach
+# Cybersec Career Coach
 
 <p align="center">
   <img src="https://img.shields.io/badge/Open--Source-MIT-blue?style=for-the-badge&logo=github" alt="MIT License" />
@@ -8,7 +8,7 @@
 
 ---
 
-## 🔮 The God-Tier Cybersecurity Career Advisor
+## The God-Tier Cybersecurity Career Advisor
 
 The **Cybersec Career Coach** is a brutally honest, deeply analytical, and structured career advisor designed to guide you through every stage of your cybersecurity journey. 
 
@@ -19,46 +19,46 @@ Unlike generic career guides, the Coach operates like a **security incident inve
 
 ---
 
-## 📦 What's Inside This Repository
+## What's Inside This Repository
 
 This repository contains two options to suit your setup:
 
-### 1. 🔐 Consolidated System Prompt (`cybersec-career-coach.md`)
+### 1. Consolidated System Prompt (`cybersec-career-coach.md`)
 A single, massive (~14,000 token) ready-to-paste system prompt. It consolidates all experts, frameworks, roadmaps, and benchmarks into one file. Paste it directly into **Claude Projects**, **ChatGPT Custom GPTs**, **Google Gemini System Instructions**, or your custom API wrappers.
 
-### 2. 🛠️ Modular Agentic Skill (`cybersec-career-coach.skill/`)
+### 2. Modular Agentic Skill (`cybersec-career-coach.skill/`)
 A fully-featured custom skill folder designed for developer agents (like Antigravity or Claude Code). It contains modular reference guides covering specific domains:
-- 🗺️ **Career Phases & Transition Gates**: Step-by-step progressions from Phase 0 (Bedrock) to Phase 6 (C-Suite).
-- 🎓 **Certification & Home Lab Blueprints**: The exact order of certifications to take (and which ones to avoid), plus step-by-step setup guides for Wazuh, Active Directory, and Malware Sandbox labs.
-- 💼 **Job Search & Resume Optimization**: Booleans, templates, cold outreach sequences, and platform recommendations.
-- 🏛️ **The Expert Pantheon**: Pre-coded parameters to channel the specific philosophies of 40+ legends (including Bruce Schneier, Kevin Mitnick, Alan Turing, Dmitri Alperovitch, and more).
+- **Career Phases & Transition Gates**: Step-by-step progressions from Phase 0 (Bedrock) to Phase 6 (C-Suite).
+- **Certification & Home Lab Blueprints**: The exact order of certifications to take (and which ones to avoid), plus step-by-step setup guides for Wazuh, Active Directory, and Malware Sandbox labs.
+- **Job Search & Resume Optimization**: Booleans, templates, cold outreach sequences, and platform recommendations.
+- **The Expert Pantheon**: Pre-coded parameters to channel the specific philosophies of 40+ legends (including Bruce Schneier, Kevin Mitnick, Alan Turing, Dmitri Alperovitch, and more).
 
 ---
 
-## 🚀 Quick Start Guide (Via npx CLI)
+## Quick Start Guide (Via npx CLI)
 
 The easiest way to use the Coach, copy the system prompt, or install the skill is by using our **npx CLI tool**:
 
-### 1. 🔮 Run the Interactive Intake & Diagnostic
+### 1. Run the Interactive Intake & Diagnostic
 Start an interactive terminal session that guides you through the Intake Questionnaire and generates a career diagnostic report utilizing LLMs (Gemini or Claude):
 ```bash
 npx cybersec-career-coach
 ```
 
-### 🍖 Run the Diagnostic in Caveman Mode
+### Run the Diagnostic in Caveman Mode
 Run the same diagnostic questionnaire, but prompt the Coach to answer in a brutally honest, primitive "caveman" style:
 ```bash
 npx cybersec-career-coach caveman
 ```
 
-### 2. 📋 Copy the System Prompt to Clipboard
+### 2. Copy the System Prompt to Clipboard
 Copy the complete, ready-to-paste system prompt directly to your clipboard:
 ```bash
 npx cybersec-career-coach copy
 ```
 *Then paste it directly as a System Prompt into Claude Projects, ChatGPT Custom GPTs, or Google AI Studio.*
 
-### 🛠️ 3. Install the Modular Agentic Skill
+### 3. Install the Modular Agentic Skill
 If you use developer agents (like Claude Code or Google Antigravity), you can install the custom skill:
 - **Local installation** (in your current project):
   ```bash
@@ -71,8 +71,7 @@ If you use developer agents (like Claude Code or Google Antigravity), you can in
 
 ---
 
-
-## 📋 Command Reference
+## Command Reference
 
 Once the prompt is active, you can trigger specific diagnostics using these shorthand commands:
 
@@ -91,21 +90,21 @@ Once the prompt is active, you can trigger specific diagnostics using these shor
 
 ---
 
-## 🔬 The 8-Dimension Gap Analysis Framework
+## The 8-Dimension Gap Analysis Framework
 
 The Coach evaluates your profile across 8 distinct dimensions:
-1. 🧠 **Knowledge Gaps**: Theoretical concepts required for the target role.
-2. 🛠️ **Skill Gaps**: Practical tasks you can do independently (not just describe).
-3. ⚙️ **Tool Gaps**: Hands-on experience with SIEMs, EDRs, hypervisors, etc.
-4. 📜 **Certification Gaps**: Aligning credentials with target requirements.
-5. 📂 **Portfolio Gaps**: Verifiable proof (GitHub repos, CTFs, lab write-ups).
-6. 🌐 **Network Gaps**: Professional community presence and referral access.
-7. 👁️ **Mindset Gaps**: Thinking patterns (e.g., defender vs. adversary).
-8. 🗣️ **Communication Gaps**: Explaining technical risks in terms of business impact.
+1. **Knowledge Gaps**: Theoretical concepts required for the target role.
+2. **Skill Gaps**: Practical tasks you can do independently (not just describe).
+3. **Tool Gaps**: Hands-on experience with SIEMs, EDRs, hypervisors, etc.
+4. **Certification Gaps**: Aligning credentials with target requirements.
+5. **Portfolio Gaps**: Verifiable proof (GitHub repos, CTFs, lab write-ups).
+6. **Network Gaps**: Professional community presence and referral access.
+7. **Mindset Gaps**: Thinking patterns (e.g., defender vs. adversary).
+8. **Communication Gaps**: Explaining technical risks in terms of business impact.
 
 ---
 
-## 🏛️ The Expert Pantheon
+## The Expert Pantheon
 
 The Coach channels specific mentors based on your diagnosis:
 
@@ -122,7 +121,7 @@ The Coach channels specific mentors based on your diagnosis:
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
 .
@@ -136,7 +135,7 @@ The Coach channels specific mentors based on your diagnosis:
 
 ---
 
-## 👥 Credits
+## Credits
 
 *   **Creator**: Raghav Gupta ([@cyberhavox](https://github.com/cyberhavox))
     *   Founder, BSides Faridabad
@@ -144,6 +143,6 @@ The Coach channels specific mentors based on your diagnosis:
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](file:///d:/PORTFOLIO/CHS/LICENSE) file for details.
