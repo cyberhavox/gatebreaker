@@ -1,0 +1,9 @@
+# Exclude temporary extracted directories
+skill-extracted/
+
+# Exclude zip archives
+*.zip
+
+# OS temporary files
+.DS_Store
+Thumbs.db
