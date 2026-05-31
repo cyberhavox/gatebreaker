@@ -54,7 +54,7 @@ function copyToClipboard(text) {
 // CLI Header
 function printHeader() {
   console.log(pc.cyan(`
-  🔐  ${pc.bold('CYBERSEC CAREER ORACLE')}
+  🔐  ${pc.bold('CYBERSEC CAREER COACH')}
   ${pc.dim('Brutally Honest Career Diagnostics & Actionable Roadmaps')}
   `));
 }
@@ -223,13 +223,13 @@ async function main() {
 
   if (command === 'copy') {
     try {
-      const promptPath = path.join(rootDir, 'cybersec-career-oracle.md');
+      const promptPath = path.join(rootDir, 'cybersec-career-coach.md');
       const text = await fs.readFile(promptPath, 'utf8');
       await copyToClipboard(text);
       console.log(pc.green('✓ System prompt copied to clipboard successfully!'));
     } catch (err) {
       console.log(pc.red('Error copying to clipboard: ' + err.message));
-      console.log(pc.yellow('Fallback: You can find the prompt file at:\n' + path.join(rootDir, 'cybersec-career-oracle.md')));
+      console.log(pc.yellow('Fallback: You can find the prompt file at:\n' + path.join(rootDir, 'cybersec-career-coach.md')));
     }
     return;
   }
@@ -257,12 +257,12 @@ async function main() {
     return;
   }
 
-  if (command === 'start' || command === 'run') {
+  if (command === 'start' || command === 'run' || command === 'caveman') {
     printHeader();
     const answers = await runIntakeFlow();
 
     // Setup User prompt
-    const formattedUserMsg = `
+    let formattedUserMsg = `
 I have completed my Intake Questionnaire. Please perform a career diagnostic.
 
 Q1 — Help Needed:
@@ -288,6 +288,10 @@ Q5 — Biggest Obstacle:
 - Single biggest obstacle: ${answers.biggestObstacle}
     `.trim();
 
+    if (command === 'caveman') {
+      formattedUserMsg += `\n\n[CAVEMAN MODE ACTIVE] Speak exclusively in the Caveman Coach voice (extremely simplified, primitive, broken English/Hinglish, raw and blunt). No professional jargon.`;
+    }
+
     // Determine LLM options
     let apiProvider = null;
     let apiKey = process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY;
@@ -311,7 +315,7 @@ Q5 — Biggest Obstacle:
       });
 
       if (apiChoice.choice === 'none') {
-        console.log(pc.yellow('\nHere is your formatted intake payload. Copy and paste this to the Oracle:'));
+        console.log(pc.yellow('\nHere is your formatted intake payload. Copy and paste this to the Coach:'));
         console.log(pc.gray('--------------------------------------------------'));
         console.log(formattedUserMsg);
         console.log(pc.gray('--------------------------------------------------'));
@@ -334,10 +338,10 @@ Q5 — Biggest Obstacle:
       return;
     }
 
-    console.log(pc.yellow(`\nChannelling the Oracle via ${apiProvider === 'gemini' ? 'Gemini' : 'Anthropic'}...`));
+    console.log(pc.yellow(`\nChannelling the Coach via ${apiProvider === 'gemini' ? 'Gemini' : 'Anthropic'}...`));
 
     try {
-      const systemPromptPath = path.join(rootDir, 'cybersec-career-oracle.md');
+      const systemPromptPath = path.join(rootDir, 'cybersec-career-coach.md');
       const systemPrompt = await fs.readFile(systemPromptPath, 'utf8');
 
       // Loading indicator
@@ -352,7 +356,7 @@ Q5 — Biggest Obstacle:
       clearInterval(interval);
       process.stdout.write('\r' + ' '.repeat(40) + '\r'); // Clear loading line
 
-      console.log(pc.bold(pc.green('\n--- ORACLE DIAGNOSTIC RESPONSE ---')));
+      console.log(pc.bold(pc.green('\n--- COACH DIAGNOSTIC RESPONSE ---')));
       console.log(diagnosticResponse);
       console.log(pc.bold(pc.green('----------------------------------\n')));
     } catch (err) {
@@ -367,6 +371,7 @@ Q5 — Biggest Obstacle:
   
   ${pc.yellow('Usage:')}
     npx cybersec-career-coach           ${pc.dim('- Start the interactive career intake and diagnostic')}
+    npx cybersec-career-coach caveman   ${pc.dim('- Start the interactive diagnostic in Caveman style')}
     npx cybersec-career-coach copy      ${pc.dim('- Copy the full system prompt to your clipboard')}
     npx cybersec-career-coach install   ${pc.dim('- Install the modular skill folder to .skills/')}
     npx cybersec-career-coach install --global  ${pc.dim('- Install the skill globally in ~/.gemini/config/skills')}

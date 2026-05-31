@@ -1,4 +1,4 @@
-# 🔐 Cybersec Career Oracle & Coach
+# 🔐 Cybersec Career Coach
 
 <p align="center">
   <img src="https://img.shields.io/badge/Open--Source-MIT-blue?style=for-the-badge&logo=github" alt="MIT License" />
@@ -10,12 +10,12 @@
 
 ## 🔮 The God-Tier Cybersecurity Career Advisor
 
-The **Cybersec Career Oracle** is a brutally honest, deeply analytical, and structured career advisor designed to guide you through every stage of your cybersecurity journey. 
+The **Cybersec Career Coach** is a brutally honest, deeply analytical, and structured career advisor designed to guide you through every stage of your cybersecurity journey. 
 
-Unlike generic career guides, the Oracle operates like a **security incident investigation**: it gathers all evidence, forms diagnostic hypotheses, runs gap analyses across 8 core dimensions, and prescribes specific, actionable, and time-bound remediation plans.
+Unlike generic career guides, the Coach operates like a **security incident investigation**: it gathers all evidence, forms diagnostic hypotheses, runs gap analyses across 8 core dimensions, and prescribes specific, actionable, and time-bound remediation plans.
 
 > [!IMPORTANT]
-> **Radical Honesty is the Core Doctrine.** The Oracle does not sugarcoat the reality of the cybersecurity job market. It tells you exactly where you are, what is actually holding you back, and exactly what to do next.
+> **Radical Honesty is the Core Doctrine.** The Coach does not sugarcoat the reality of the cybersecurity job market. It tells you exactly where you are, what is actually holding you back, and exactly what to do next.
 
 ---
 
@@ -23,7 +23,7 @@ Unlike generic career guides, the Oracle operates like a **security incident inv
 
 This repository contains two options to suit your setup:
 
-### 1. 🔐 Consolidated System Prompt (`cybersec-career-oracle.md`)
+### 1. 🔐 Consolidated System Prompt (`cybersec-career-coach.md`)
 A single, massive (~14,000 token) ready-to-paste system prompt. It consolidates all experts, frameworks, roadmaps, and benchmarks into one file. Paste it directly into **Claude Projects**, **ChatGPT Custom GPTs**, **Google Gemini System Instructions**, or your custom API wrappers.
 
 ### 2. 🛠️ Modular Agentic Skill (`cybersec-career-coach.skill/`)
@@ -37,12 +37,18 @@ A fully-featured custom skill folder designed for developer agents (like Antigra
 
 ## 🚀 Quick Start Guide (Via npx CLI)
 
-The easiest way to use the Oracle, copy the system prompt, or install the skill is by using our **npx CLI tool**:
+The easiest way to use the Coach, copy the system prompt, or install the skill is by using our **npx CLI tool**:
 
 ### 1. 🔮 Run the Interactive Intake & Diagnostic
 Start an interactive terminal session that guides you through the Intake Questionnaire and generates a career diagnostic report utilizing LLMs (Gemini or Claude):
 ```bash
 npx cybersec-career-coach
+```
+
+### 🍖 Run the Diagnostic in Caveman Mode
+Run the same diagnostic questionnaire, but prompt the Coach to answer in a brutally honest, primitive "caveman" style:
+```bash
+npx cybersec-career-coach caveman
 ```
 
 ### 2. 📋 Copy the System Prompt to Clipboard
@@ -87,7 +93,7 @@ Once the prompt is active, you can trigger specific diagnostics using these shor
 
 ## 🔬 The 8-Dimension Gap Analysis Framework
 
-The Oracle evaluates your profile across 8 distinct dimensions:
+The Coach evaluates your profile across 8 distinct dimensions:
 1. 🧠 **Knowledge Gaps**: Theoretical concepts required for the target role.
 2. 🛠️ **Skill Gaps**: Practical tasks you can do independently (not just describe).
 3. ⚙️ **Tool Gaps**: Hands-on experience with SIEMs, EDRs, hypervisors, etc.
@@ -101,7 +107,7 @@ The Oracle evaluates your profile across 8 distinct dimensions:
 
 ## 🏛️ The Expert Pantheon
 
-The Oracle channels specific mentors based on your diagnosis:
+The Coach channels specific mentors based on your diagnosis:
 
 *   **Sun Tzu** (Red Team Strategy & Deception)
 *   **Bruce Schneier** (Process Realism & Schneier's Law)
@@ -120,7 +126,7 @@ The Oracle channels specific mentors based on your diagnosis:
 
 ```
 .
-├── cybersec-career-oracle.md       # Consolidated ready-to-paste system prompt
+├── cybersec-career-coach.md        # Consolidated ready-to-paste system prompt
 ├── LICENSE                         # MIT License
 ├── README.md                       # Documentation and usage guide
 └── cybersec-career-coach.skill/     # Custom modular agentic skill folder
