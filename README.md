@@ -204,6 +204,21 @@ The Coach channels specific mentors based on your diagnosis:
 
 ---
 
+## Version History
+
+| Version | Key Changes |
+| :--- | :--- |
+| **1.0.7** | Added support for 12 global LLM API providers (Gemini, Anthropic, OpenAI, Groq, OpenRouter, DeepSeek, Mistral, Cohere, Krutrim, Sarvam, Zhipu, Qwen). Added OIDC Trusted Publishing. |
+| **1.0.6** | Optimized package size via `.npmignore` and added automated CI/CD publish workflows. |
+| **1.0.5** | Launched interactive Visual HTML/SVG Career Roadmap & Lab Checklist generator. |
+| **1.0.4** | Added support for local caching and automatic report saving (`.md` output). |
+| **1.0.3** | Integrated Universal AI rules for IDEs (`.cursorrules`, `.windsurfrules`, `.clinerules`, etc.). |
+| **1.0.2** | Implemented **Caveman Mode** for brutally honest, primitive diagnostics. |
+| **1.0.1** | Rebranded from "Oracle" to **Coach** and renamed package to `cybersec-career-coach`. |
+| **1.0.0** | Initial public release of the System Prompt and Agentic Skill. |
+
+---
+
 ## Credits
 
 *   **Creator**: Raghav Gupta ([@cyberhavox](https://github.com/cyberhavox))
