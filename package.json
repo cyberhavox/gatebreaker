@@ -1,0 +1,33 @@
+{
+  "name": "cybersec-career-oracle",
+  "version": "1.0.0",
+  "description": "Brutally honest, god-tier cybersecurity career advisor system prompt & agentic skill.",
+  "main": "bin/cli.js",
+  "type": "module",
+  "bin": {
+    "cybersec-oracle": "bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyberhavox/CHS.git"
+  },
+  "keywords": [
+    "cybersecurity",
+    "career",
+    "advice",
+    "mentor",
+    "prompt",
+    "agentic-skill",
+    "claude",
+    "gpt"
+  ],
+  "author": "Raghav Gupta (@cyberhavox)",
+  "license": "MIT",
+  "dependencies": {
+    "picocolors": "^1.0.0",
+    "prompts": "^2.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

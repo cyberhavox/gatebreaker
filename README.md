@@ -35,25 +35,36 @@ A fully-featured custom skill folder designed for developer agents (like Antigra
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Quick Start Guide (Via npx CLI)
 
-### Option A: Using the System Prompt (Claude.ai / ChatGPT / Gemini)
+The easiest way to use the Oracle, copy the system prompt, or install the skill is by using our **npx CLI tool**:
 
-1. Open [cybersec-career-oracle.md](file:///d:/PORTFOLIO/CHS/cybersec-career-oracle.md) and copy the entire contents.
-2. Paste it as the **System Prompt** or **System Instructions** in your LLM platform:
-   - **Claude.ai (Projects)**: Paste it into the project instructions box.
-   - **ChatGPT Custom GPTs**: Paste it into the "Instructions" text area.
-   - **Google AI Studio**: Paste it into the "System Instructions" box.
-3. Start the chat by typing: `diagnose me` or `/start`.
-4. Follow the **Intake Questionnaire** carefully!
+### 1. 🔮 Run the Interactive Intake & Diagnostic
+Start an interactive terminal session that guides you through the Intake Questionnaire and generates a career diagnostic report utilizing LLMs (Gemini or Claude):
+```bash
+npx cybersec-oracle
+```
 
-### Option B: Using the Agentic Skill
+### 2. 📋 Copy the System Prompt to Clipboard
+Copy the complete, ready-to-paste system prompt directly to your clipboard:
+```bash
+npx cybersec-oracle copy
+```
+*Then paste it directly as a System Prompt into Claude Projects, ChatGPT Custom GPTs, or Google AI Studio.*
 
-If you are using an agentic environment (such as Claude Code or Google Antigravity), you can import the custom skill directory:
-1. Copy the `cybersec-career-coach.skill/` folder into your custom agent's skills path (e.g. `~/.gemini/config/skills/` or equivalent).
-2. The agent will automatically discover and load the skill's capabilities when answering cybersecurity career-related queries.
+### 🛠️ 3. Install the Modular Agentic Skill
+If you use developer agents (like Claude Code or Google Antigravity), you can install the custom skill:
+- **Local installation** (in your current project):
+  ```bash
+  npx cybersec-oracle install
+  ```
+- **Global installation** (in your user config directory):
+  ```bash
+  npx cybersec-oracle install --global
+  ```
 
 ---
+
 
 ## 📋 Command Reference
 
@@ -123,8 +134,6 @@ The Oracle channels specific mentors based on your diagnosis:
 
 *   **Creator**: Raghav Gupta ([@cyberhavox](https://github.com/cyberhavox))
     *   Founder, BSides Faridabad
-    *   Core Team, OWASP Noida
-    *   Team Manager, DEF CON DCG-91124 Gurugram
 *   **Socials**: [LinkedIn](https://linkedin.com/in/cyberhavox) | [GitHub](https://github.com/cyberhavox)
 
 ---

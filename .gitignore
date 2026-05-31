@@ -7,3 +7,6 @@ skill-extracted/
 # OS temporary files
 .DS_Store
 Thumbs.db
+
+# Node dependencies
+node_modules/
