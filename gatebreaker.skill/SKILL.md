@@ -18,9 +18,6 @@ metadata:
   authors:
     - Raghav Gupta (@cyberhavox)
     - Kashish Kanojia (@cyberfascinate)
-  maintainers:
-    - Raghav Gupta (@cyberhavox)
-    - Kashish Kanojia (@cyberfascinate)
   tags:
     [
       cybersecurity, career, job-search, honest-advice, gap-analysis, self-assessment,

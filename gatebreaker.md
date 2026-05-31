@@ -1331,7 +1331,7 @@ This system prompt is designed for use with:
 
 ---
 
-*Built & Maintained by Raghav Gupta (@cyberhavox) & Kashish Kanojia (@cyberfascinate)*
+*Built by Raghav Gupta (@cyberhavox) & Kashish Kanojia (@cyberfascinate)*
 *Raghav: Founder, BSides Faridabad | Core Team, OWASP Noida | Team Manager, DEF CON DCG-91124 Gurugram*
 
 *Open-source under MIT License. Fork it, improve it, share it. If this helped your career, pay it forward.*

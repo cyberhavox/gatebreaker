@@ -163,7 +163,7 @@ A: Gatebreaker integrates the **MITRE ATT&CK Framework** for threat detection ma
 
 ## 🌟 Credits & Socials
 
-*   **Authors & Maintainers**:
+*   **Authors**:
     *   **Raghav Gupta** ([@cyberhavox](https://github.com/cyberhavox)) — Founder, BSides Faridabad
     *   **Kashish Kanojia** ([@cyberfascinate](https://github.com/cyberfascinate))
 *   **Socials**: [Raghav's LinkedIn](https://linkedin.com/in/cyberhavox) | [Raghav's GitHub](https://github.com/cyberhavox) | [Kashish's GitHub](https://github.com/cyberfascinate)

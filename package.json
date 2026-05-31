@@ -22,10 +22,6 @@
     "gpt"
   ],
   "author": "Raghav Gupta (@cyberhavox) & Kashish Kanojia (@cyberfascinate)",
-  "maintainers": [
-    "Raghav Gupta (@cyberhavox)",
-    "Kashish Kanojia (@cyberfascinate)"
-  ],
   "license": "MIT",
   "dependencies": {
     "cybersec-career-coach": "^1.0.8",
