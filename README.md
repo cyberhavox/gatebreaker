@@ -208,7 +208,8 @@ The Coach channels specific mentors based on your diagnosis:
 
 | Version | Key Changes |
 | :--- | :--- |
-| **1.0.7** | Added support for 12 global LLM API providers (Gemini, Anthropic, OpenAI, Groq, OpenRouter, DeepSeek, Mistral, Cohere, Krutrim, Sarvam, Zhipu, Qwen). Added OIDC Trusted Publishing. |
+| **1.0.8** | Added OIDC Trusted Publishing and modernized CI/CD workflow. Cleaned up redundant dependencies. |
+| **1.0.7** | Added support for 12 global LLM API providers (Gemini, Anthropic, OpenAI, Groq, OpenRouter, DeepSeek, Mistral, Cohere, Krutrim, Sarvam, Zhipu, Qwen). |
 | **1.0.6** | Optimized package size via `.npmignore` and added automated CI/CD publish workflows. |
 | **1.0.5** | Launched interactive Visual HTML/SVG Career Roadmap & Lab Checklist generator. |
 | **1.0.4** | Added support for local caching and automatic report saving (`.md` output). |
