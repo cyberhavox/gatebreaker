@@ -14,6 +14,42 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
+// ─── File text extractor: .txt .md .pdf .docx ────────────────────────────────
+async function extractTextFromFile(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+
+  if (ext === '.pdf') {
+    try {
+      const { default: pdfParse } = await import('pdf-parse');
+      const buffer = await fs.readFile(filePath);
+      const data = await pdfParse(buffer);
+      if (!data.text || data.text.trim().length < 20) {
+        throw new Error('PDF appears to be image-only/scanned — no selectable text found.');
+      }
+      return data.text;
+    } catch (err) {
+      throw new Error(`PDF parse error: ${err.message}`);
+    }
+  }
+
+  if (ext === '.docx') {
+    try {
+      const { default: mammoth } = await import('mammoth');
+      const result = await mammoth.extractRawText({ path: filePath });
+      if (!result.value || result.value.trim().length < 20) {
+        throw new Error('DOCX appears to be empty or unreadable.');
+      }
+      return result.value;
+    } catch (err) {
+      throw new Error(`DOCX parse error: ${err.message}`);
+    }
+  }
+
+  // Fallback — plain text (.txt, .md, .json, etc.)
+  return await fs.readFile(filePath, 'utf8');
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Helper to copy directory recursively
 async function copyDir(src, dest) {
   await fs.mkdir(dest, { recursive: true });
@@ -1172,7 +1208,7 @@ async function main() {
         { title: 'The Cert Collector (Sample Resume)', value: 'cert_collector' },
         { title: 'The Software Engineer Career Pivot (Sample Resume)', value: 'career_pivot' },
         { title: 'The Stuck SOC Analyst (Sample Resume)', value: 'stuck_soc' },
-        { title: 'Load custom profile (from text file)', value: 'file' },
+        { title: 'Load custom resume/CV file  (.txt · .pdf · .docx)', value: 'file' },
         { title: 'Paste custom profile / CV text directly', value: 'paste' }
       ]
     });
@@ -1189,7 +1225,7 @@ async function main() {
       const fileInput = await prompts({
         type: 'text',
         name: 'path',
-        message: 'Enter the absolute or relative path to the text file:'
+        message: 'Enter path to your resume/CV (.txt, .pdf, .docx):'
       });
 
       if (!fileInput.path) {
@@ -1197,11 +1233,30 @@ async function main() {
         return;
       }
 
+      const resolvedPath = path.resolve(fileInput.path);
+      const ext = path.extname(resolvedPath).toLowerCase();
+      const supported = ['.txt', '.md', '.pdf', '.docx', '.rtf', '.json'];
+
+      if (!supported.includes(ext)) {
+        console.log(pc.red(`Unsupported file type "${ext}". Supported: ${supported.join(', ')}`));
+        return;
+      }
+
+      console.log(pc.dim(`\nReading ${ext.slice(1).toUpperCase()} file...`));
+
       try {
-        profileText = await fs.readFile(path.resolve(fileInput.path), 'utf8');
-        profileTitle = path.basename(fileInput.path);
+        profileText = await extractTextFromFile(resolvedPath);
+        profileTitle = path.basename(resolvedPath);
+        const wordCount = profileText.split(/\s+/).filter(Boolean).length;
+        console.log(pc.green(`✓ Extracted ${wordCount} words from ${profileTitle}\n`));
       } catch (err) {
         console.log(pc.red(`Failed to read file: ${err.message}`));
+        if (ext === '.pdf') {
+          console.log(pc.yellow('  Tip: Ensure the PDF has selectable text (not a scanned image).'));
+        }
+        if (ext === '.docx') {
+          console.log(pc.yellow('  Tip: Re-save as .docx from Microsoft Word or Google Docs.'));
+        }
         return;
       }
     } else if (profileChoice.value === 'paste') {
