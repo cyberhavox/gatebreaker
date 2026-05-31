@@ -35,6 +35,9 @@ samples/
 # Landing page & UI static files (not needed for CLI execution)
 index.html
 styles.css
+logo.png
+logo-icon.png
+logo-wordmark.png
 
 # Generated dashboards, reports & roadmaps
 expert-comparison.html
