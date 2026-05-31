@@ -42,13 +42,13 @@ The easiest way to use the Oracle, copy the system prompt, or install the skill 
 ### 1. 🔮 Run the Interactive Intake & Diagnostic
 Start an interactive terminal session that guides you through the Intake Questionnaire and generates a career diagnostic report utilizing LLMs (Gemini or Claude):
 ```bash
-npx cybersec-oracle
+npx cybersec-career-coach
 ```
 
 ### 2. 📋 Copy the System Prompt to Clipboard
 Copy the complete, ready-to-paste system prompt directly to your clipboard:
 ```bash
-npx cybersec-oracle copy
+npx cybersec-career-coach copy
 ```
 *Then paste it directly as a System Prompt into Claude Projects, ChatGPT Custom GPTs, or Google AI Studio.*
 
@@ -56,11 +56,11 @@ npx cybersec-oracle copy
 If you use developer agents (like Claude Code or Google Antigravity), you can install the custom skill:
 - **Local installation** (in your current project):
   ```bash
-  npx cybersec-oracle install
+  npx cybersec-career-coach install
   ```
 - **Global installation** (in your user config directory):
   ```bash
-  npx cybersec-oracle install --global
+  npx cybersec-career-coach install --global
   ```
 
 ---

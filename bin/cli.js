@@ -363,13 +363,13 @@ Q5 — Biggest Obstacle:
 
   // Help command / fallback
   console.log(`
-  ${pc.bold('Cybersec Career Oracle CLI')}
+  ${pc.bold('Cybersec Career Coach CLI')}
   
   ${pc.yellow('Usage:')}
-    npx cybersec-oracle           ${pc.dim('- Start the interactive career intake and diagnostic')}
-    npx cybersec-oracle copy      ${pc.dim('- Copy the full system prompt to your clipboard')}
-    npx cybersec-oracle install   ${pc.dim('- Install the modular skill folder to .skills/')}
-    npx cybersec-oracle install --global  ${pc.dim('- Install the skill globally in ~/.gemini/config/skills')}
+    npx cybersec-career-coach           ${pc.dim('- Start the interactive career intake and diagnostic')}
+    npx cybersec-career-coach copy      ${pc.dim('- Copy the full system prompt to your clipboard')}
+    npx cybersec-career-coach install   ${pc.dim('- Install the modular skill folder to .skills/')}
+    npx cybersec-career-coach install --global  ${pc.dim('- Install the skill globally in ~/.gemini/config/skills')}
   `);
 }
 

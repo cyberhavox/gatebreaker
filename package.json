@@ -1,11 +1,11 @@
 {
-  "name": "cybersec-career-oracle",
+  "name": "cybersec-career-coach",
   "version": "1.0.0",
   "description": "Brutally honest, god-tier cybersecurity career advisor system prompt & agentic skill.",
   "main": "bin/cli.js",
   "type": "module",
   "bin": {
-    "cybersec-oracle": "bin/cli.js"
+    "cybersec-career-coach": "bin/cli.js"
   },
   "repository": {
     "type": "git",
