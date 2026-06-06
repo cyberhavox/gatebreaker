@@ -3,7 +3,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { spawn, exec } from 'child_process';
+import { spawn, execFile } from 'child_process';
 import os from 'os';
 import prompts from 'prompts';
 import pc from 'picocolors';
@@ -14,12 +14,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-// ─── File text extractor: .txt .md .pdf .docx ────────────────────────────────
 async function extractTextFromFile(filePath) {
   const ext = path.extname(filePath).toLowerCase();
 
   if (ext === '.pdf') {
     try {
+      // H-01: Use named export PDFParse class from mehmet-kozan/pdf-parse
       const { PDFParse } = await import('pdf-parse');
       const buffer = await fs.readFile(filePath);
       const parser = new PDFParse({ data: buffer });
@@ -32,6 +32,10 @@ async function extractTextFromFile(filePath) {
       }
       return text;
     } catch (err) {
+      // L-05: Surface missing-module errors explicitly so users know to npm install
+      if (err.code === 'ERR_MODULE_NOT_FOUND' || err.code === 'MODULE_NOT_FOUND') {
+        throw new Error('pdf-parse module not found. Please run: npm install pdf-parse');
+      }
       throw new Error(`PDF parse error: ${err.message}`);
     }
   }
@@ -45,6 +49,10 @@ async function extractTextFromFile(filePath) {
       }
       return result.value;
     } catch (err) {
+      // L-05
+      if (err.code === 'ERR_MODULE_NOT_FOUND' || err.code === 'MODULE_NOT_FOUND') {
+        throw new Error('mammoth module not found. Please run: npm install mammoth');
+      }
       throw new Error(`DOCX parse error: ${err.message}`);
     }
   }
@@ -52,7 +60,6 @@ async function extractTextFromFile(filePath) {
   // Fallback — plain text (.txt, .md, .json, etc.)
   return await fs.readFile(filePath, 'utf8');
 }
-// ─────────────────────────────────────────────────────────────────────────────
 
 // Helper to copy directory recursively
 async function copyDir(src, dest) {
@@ -60,6 +67,9 @@ async function copyDir(src, dest) {
   const entries = await fs.readdir(src, { withFileTypes: true });
 
   for (const entry of entries) {
+    // M-06: Skip symlinks — crafted skill dirs could otherwise escape the dest tree
+    if (entry.isSymbolicLink()) continue;
+
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
 
@@ -69,6 +79,41 @@ async function copyDir(src, dest) {
       await fs.copyFile(srcPath, destPath);
     }
   }
+}
+
+// H-05: Input size limits — warn at 15K chars, hard-reject at 100K
+const MAX_INPUT_CHARS  = 100_000;
+const WARN_INPUT_CHARS =  15_000;
+
+// H-03: Cache constants
+const CACHE_EXPIRY_DAYS = 30;
+const CACHE_REQUIRED_KEYS = [
+  'helpCategories', 'backgroundYears', 'backgroundRoles', 'backgroundCerts',
+  'backgroundDegree', 'targetRole', 'targetSeniority', 'targetLocation',
+  'targetTimeline', 'triedSoFar', 'attemptsOutcome', 'biggestObstacle'
+];
+
+/** Returns true if the parsed cache object is structurally valid and not expired. */
+function validateCache(parsed) {
+  if (!parsed || typeof parsed !== 'object') return false;
+  if (!CACHE_REQUIRED_KEYS.every(k => k in parsed)) return false;
+  if (parsed.cachedAt) {
+    const ageDays = (Date.now() - new Date(parsed.cachedAt).getTime()) / (86_400_000);
+    if (ageDays > CACHE_EXPIRY_DAYS) return false;
+  }
+  return true;
+}
+
+/**
+ * H-04: Resolves outputFile and verifies it stays within process.cwd().
+ * Returns the resolved absolute path on success, or null if unsafe.
+ */
+function validateOutputPath(outputFile) {
+  if (!outputFile || outputFile.includes('\0')) return null;
+  const resolved = path.resolve(outputFile);
+  const cwd = path.resolve(process.cwd());
+  if (resolved !== cwd && !resolved.startsWith(cwd + path.sep)) return null;
+  return resolved;
 }
 
 // Helper to copy text to clipboard (zero-dependency)
@@ -130,26 +175,32 @@ async function runIntakeFlow() {
     {
       type: 'text',
       name: 'backgroundYears',
-      message: 'Q2: How many years of experience do you have in IT or cybersecurity?',
-      initial: '0'
+      // I-04: Q2a/b/c/d sub-labels to avoid duplicate Q2 display in terminal
+      message: 'Q2a: How many years of experience do you have in IT or cybersecurity?',
+      initial: '0',
+      // L-01: Numeric validation on experience field
+      validate: val => /^\d+(\.\d+)?$/.test(val.trim()) ? true : 'Please enter a number (e.g. 0, 2, 5)'
     },
     {
       type: 'text',
       name: 'backgroundRoles',
-      message: 'Q2: What roles/job titles have you held (IT or non-IT)?',
-      initial: 'None / Student'
+      message: 'Q2b: What roles/job titles have you held (IT or non-IT)?',
+      initial: 'None / Student',
+      validate: val => val.length <= 500 ? true : `Please keep this under 500 characters (${val.length} entered)`
     },
     {
       type: 'text',
       name: 'backgroundCerts',
-      message: 'Q2: What certifications do you currently hold?',
-      initial: 'None'
+      message: 'Q2c: What certifications do you currently hold?',
+      initial: 'None',
+      validate: val => val.length <= 500 ? true : `Please keep this under 500 characters (${val.length} entered)`
     },
     {
       type: 'text',
       name: 'backgroundDegree',
-      message: 'Q2: Do you have a degree? If so, in what field?',
-      initial: 'None'
+      message: 'Q2d: Do you have a degree? If so, in what field?',
+      initial: 'None',
+      validate: val => val.length <= 500 ? true : `Please keep this under 500 characters (${val.length} entered)`
     },
     {
       type: 'text',
@@ -211,22 +262,32 @@ async function runIntakeFlow() {
 
 // Call LLM API (Gemini, Anthropic, OpenAI, Groq, OpenRouter, Ollama)
 async function callLLM(systemPrompt, userMessage, provider, apiKey, options = {}) {
-  // Use fast, low-latency models for rapid CLI diagnostics and simulations
-  const modelName = provider === 'gemini' ? 'gemini-1.5-flash' : 'claude-3-5-haiku-20241022';
+  // I-01: Simple retry wrapper for 429/503 rate-limit responses
+  async function fetchWithRetry(fetchFn, retries = 3) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const res = await fetchFn();
+      if (res.status !== 429 && res.status !== 503) return res;
+      if (attempt < retries) {
+        const wait = (2 ** attempt) * 1000;
+        await new Promise(r => setTimeout(r, wait));
+      } else return res;
+    }
+  }
 
   if (provider === 'gemini') {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+    // M-02: Updated to gemini-2.0-flash (1.5-flash is deprecated)
+    const geminiModel = 'gemini-2.0-flash';
+    const response = await fetchWithRetry(() => fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-
           contents: [{ role: 'user', parts: [{ text: userMessage }] }],
           systemInstruction: { parts: [{ text: systemPrompt }] }
         })
       }
-    );
+    ));
 
     if (!response.ok) {
       const errText = await response.text();
@@ -238,7 +299,9 @@ async function callLLM(systemPrompt, userMessage, provider, apiKey, options = {}
   }
 
   if (provider === 'anthropic') {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // M-01: anthropicModel scoped to this branch (was dead code at top level)
+    const anthropicModel = 'claude-haiku-4-5';
+    const response = await fetchWithRetry(() => fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,
@@ -246,12 +309,12 @@ async function callLLM(systemPrompt, userMessage, provider, apiKey, options = {}
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        model: modelName,
+        model: anthropicModel,
         max_tokens: 4096,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMessage }]
       })
-    });
+    }));
 
     if (!response.ok) {
       const errText = await response.text();
@@ -271,10 +334,11 @@ async function callLLM(systemPrompt, userMessage, provider, apiKey, options = {}
     model = 'gpt-4o-mini';
   } else if (provider === 'groq') {
     url = 'https://api.groq.com/openai/v1/chat/completions';
-    model = 'llama-3.1-8b-instant';
+    model = 'llama-3.3-70b-versatile';
   } else if (provider === 'openrouter') {
     url = 'https://openrouter.ai/api/v1/chat/completions';
-    model = 'meta-llama/llama-3-8b-instruct:free';
+    // M-03: Updated from llama-3-8b (superseded) to llama-3.3-70b free tier
+    model = 'meta-llama/llama-3.3-70b-instruct:free';
   } else if (provider === 'deepseek') {
     url = 'https://api.deepseek.com/v1/chat/completions';
     model = 'deepseek-chat';
@@ -302,13 +366,16 @@ async function callLLM(systemPrompt, userMessage, provider, apiKey, options = {}
   }
 
   if (url) {
+    // M-05: Only send api-key header to Sarvam AI; other providers don't expect it
     const headers = { 'Content-Type': 'application/json' };
     if (provider !== 'ollama') {
       headers['Authorization'] = `Bearer ${apiKey}`;
-      headers['api-key'] = apiKey; // Support Sarvam AI header
+    }
+    if (provider === 'sarvam') {
+      headers['api-key'] = apiKey;
     }
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(() => fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -317,9 +384,10 @@ async function callLLM(systemPrompt, userMessage, provider, apiKey, options = {}
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage }
         ],
+        max_tokens: 4096,
         temperature: 0.2
       })
-    });
+    }));
 
     if (!response.ok) {
       const errText = await response.text();
@@ -1098,7 +1166,7 @@ async function main() {
     roadmap                             - Generate your interactive SVG/HTML career roadmap and lab checklist
     copy                                - Copy the full system prompt to your clipboard
     install                             - Install the modular skill folder to .skills/
-    install --global / -g               - Install the skill globally in ~/.gemini/config/skills
+    install --global                   - Install the skill globally in ~/.gemini/config/skills
 
   ${pc.yellow('Options:')}
     -g, --gemini                        - Force Google Gemini API provider (USA)
@@ -1153,8 +1221,9 @@ async function main() {
       } else if (arg === '--ollama') {
         cliProvider = 'ollama';
       } else if (arg.startsWith('--output=')) {
-        outputFile = arg.split('=')[1];
-      } else if (arg === '-o') {
+        // I-02: Use indexOf to avoid truncating paths that contain '=' signs
+        outputFile = arg.slice(arg.indexOf('=') + 1);
+      } else if (arg === '-o' || arg === '--output') {
         if (i + 1 < args.length) {
           outputFile = args[i + 1];
           i++;
@@ -1179,22 +1248,31 @@ async function main() {
   }
 
   if (command === 'install') {
-    const isGlobal = args.includes('--global') || args.includes('-g');
-    let destDir;
+    // H-02: Install global flag is --global only; -g is reserved for --gemini in start/roadmap
+    const isGlobal = args.includes('--global');
+    const destDirs = [];
 
     if (isGlobal) {
-      // Install globally to standard config directory (e.g. ~/.gemini/config/skills)
+      // Install globally to standard config directories for both Gemini/Antigravity and Claude Code
       const home = process.env.HOME || process.env.USERPROFILE;
-      destDir = path.join(home, '.gemini', 'config', 'skills', 'gatebreaker.skill');
+      destDirs.push(
+        path.join(home, '.gemini', 'config', 'skills', 'gatebreaker.skill'),
+        path.join(home, '.claude', 'skills', 'gatebreaker.skill')
+      );
     } else {
-      // Local install in current project
-      destDir = path.join(process.cwd(), '.skills', 'gatebreaker.skill');
+      // Local install in current project for both Gemini/Antigravity and Claude Code
+      destDirs.push(
+        path.join(process.cwd(), '.skills', 'gatebreaker.skill'),
+        path.join(process.cwd(), '.claude', 'skills', 'gatebreaker.skill')
+      );
     }
 
     try {
       const srcDir = path.join(rootDir, 'gatebreaker.skill');
-      await copyDir(srcDir, destDir);
-      console.log(pc.green(`✓ Skill installed successfully at:\n  ${destDir}`));
+      for (const destDir of destDirs) {
+        await copyDir(srcDir, destDir);
+      }
+      console.log(pc.green(`✓ Skill installed successfully at:\n${destDirs.map(d => `  ${d}`).join('\n')}`));
     } catch (err) {
       console.log(pc.red('Error installing skill: ' + err.message));
     }
@@ -1257,6 +1335,14 @@ async function main() {
         profileText = await extractTextFromFile(resolvedPath);
         profileTitle = path.basename(resolvedPath);
         const wordCount = profileText.split(/\s+/).filter(Boolean).length;
+        // H-05: Hard-reject oversized inputs; warn on large-but-acceptable ones
+        if (profileText.length > MAX_INPUT_CHARS) {
+          console.log(pc.red(`\nFile too large: ${profileText.length.toLocaleString()} characters. Maximum allowed is ${MAX_INPUT_CHARS.toLocaleString()}.`));
+          return;
+        }
+        if (profileText.length > WARN_INPUT_CHARS) {
+          console.log(pc.yellow(`⚠ Large input (${profileText.length.toLocaleString()} chars). This may consume significant API tokens.`));
+        }
         console.log(pc.green(`✓ Extracted ${wordCount} words from ${profileTitle}\n`));
       } catch (err) {
         console.log(pc.red(`Failed to read file: ${err.message}`));
@@ -1279,7 +1365,14 @@ async function main() {
         console.log(pc.red('No content provided. Exiting.'));
         return;
       }
-
+      // H-05: Size guard on pasted text
+      if (pasteInput.content.length > MAX_INPUT_CHARS) {
+        console.log(pc.red(`Input too large (${pasteInput.content.length.toLocaleString()} chars). Please limit to ${MAX_INPUT_CHARS.toLocaleString()} characters.`));
+        return;
+      }
+      if (pasteInput.content.length > WARN_INPUT_CHARS) {
+        console.log(pc.yellow(`⚠ Large input (${pasteInput.content.length.toLocaleString()} chars). This may consume significant API tokens.`));
+      }
       profileText = pasteInput.content;
       profileTitle = 'Pasted Custom Profile';
     } else {
@@ -1393,7 +1486,9 @@ async function main() {
     }
 
     const isPreloadedSample = ['cert_collector', 'career_pivot', 'stuck_soc'].includes(profileChoice.value);
-    const hasMockForSelectedExperts = selectedExperts.every(e => ['sun_tzu', 'bruce_schneier', 'kevin_mitnick', 'naomi_buckwalter'].includes(e));
+    // All 8 experts have mock responses (dmitri_alperovitch, lenny_zeltser, dr_eric_cole, marcus_aurelius included)
+    const ALL_MOCK_EXPERTS = ['sun_tzu', 'bruce_schneier', 'kevin_mitnick', 'naomi_buckwalter', 'dmitri_alperovitch', 'lenny_zeltser', 'dr_eric_cole', 'marcus_aurelius'];
+    const hasMockForSelectedExperts = selectedExperts.every(e => ALL_MOCK_EXPERTS.includes(e));
 
     const results = {};
 
@@ -1478,7 +1573,7 @@ async function main() {
         gemini: 'Gemini',
         anthropic: 'Claude',
         openai: 'OpenAI GPT',
-        groq: 'Groq (Llama-3.1)',
+        groq: 'Groq (Llama-3.3-70B)',
         openrouter: 'OpenRouter (Llama-3)',
         deepseek: 'DeepSeek',
         mistral: 'Mistral',
@@ -1504,7 +1599,19 @@ async function main() {
           dots++;
         }, 300);
 
-        const promises = selectedExperts.map(async (expertKey) => {
+        // Per-expert timeout wrapper: 30 s hard limit so one hung call can't freeze the dashboard
+        const EXPERT_TIMEOUT_MS = 30000;
+        const withTimeout = (promise, expertKey) => {
+          const timer = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`Timeout after ${EXPERT_TIMEOUT_MS / 1000}s`)), EXPERT_TIMEOUT_MS)
+          );
+          return Promise.race([promise, timer]).catch(err => ({
+            expertKey,
+            response: `⚠️ **${expertKey} simulation failed** (${err.message}). Re-run with a faster provider or check your network connection.`
+          }));
+        };
+
+        const promises = selectedExperts.map((expertKey) => {
           const expertInstruction = expertInstructions[expertKey];
           const expertSystemPrompt = systemPrompt + "\n\nCRITICAL INSTRUCTION: " + expertInstruction;
 
@@ -1516,10 +1623,12 @@ PROFILE / CV:
 ${profileText}
           `.trim();
 
-          const response = await callLLM(expertSystemPrompt, userMsg, apiProvider, apiKey);
-          return { expertKey, response };
+          const call = callLLM(expertSystemPrompt, userMsg, apiProvider, apiKey)
+            .then(response => ({ expertKey, response }));
+          return withTimeout(call, expertKey);
         });
 
+        // allSettled semantics via the per-promise timeout wrappers above
         const outputs = await Promise.all(promises);
         clearInterval(interval);
         process.stdout.write('\r' + ' '.repeat(40) + '\r'); // Clear loading line
@@ -1553,14 +1662,20 @@ ${profileText}
       console.log(pc.cyan(`  File URL:      file:///${outputPath.replace(/\\/g, '/')}`));
 
       console.log(pc.yellow('\nLaunching dashboard in your browser...'));
-      const launchCmd = process.platform === 'win32' ? `start "" "${outputPath}"` :
-                        process.platform === 'darwin' ? `open "${outputPath}"` :
-                        `xdg-open "${outputPath}"`;
-      exec(launchCmd, (error) => {
-        if (error) {
-          console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
-        }
-      });
+      // C-01: execFile with arg array — no shell, no injection risk
+      if (process.platform === 'win32') {
+        execFile('cmd.exe', ['/c', 'start', '', outputPath], (error) => {
+          if (error) console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
+        });
+      } else if (process.platform === 'darwin') {
+        execFile('open', [outputPath], (error) => {
+          if (error) console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
+        });
+      } else {
+        execFile('xdg-open', [outputPath], (error) => {
+          if (error) console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
+        });
+      }
     } catch (err) {
       console.log(pc.red(`Failed to generate HTML report: ${err.message}`));
     }
@@ -1573,18 +1688,41 @@ ${profileText}
 
     try {
       const cacheContent = await fs.readFile(cachePath, 'utf8');
-      answers = JSON.parse(cacheContent);
-      console.log(pc.green(`✓ Loaded intake answers from cache (Target: ${pc.bold(answers.targetRole)}).\n`));
+      const parsed = JSON.parse(cacheContent);
+      // H-03: Validate schema and check 30-day expiry before trusting cached data
+      if (!validateCache(parsed)) throw new Error('Cache invalid or expired');
+
+      console.log(pc.green(`✓ Found cached profile (Target: ${pc.bold(parsed.targetRole)}).`));
+      // L-03: roadmap command now confirms before using cache (consistent with start)
+      const confirmCache = await prompts({
+        type: 'confirm',
+        name: 'value',
+        message: 'Load from cached intake answers?',
+        initial: true
+      });
+      if (!confirmCache.value) throw new Error('User declined cache');
+
+      answers = parsed;
+      console.log(pc.green('✓ Loaded cached answers.\n'));
     } catch (e) {
-      console.log(pc.yellow('No cached profile found. Let\'s complete the intake first.'));
+      console.log(pc.yellow('No valid cached profile found. Running intake first.'));
       answers = await runIntakeFlow();
       try {
-        await fs.writeFile(cachePath, JSON.stringify(answers, null, 2), 'utf8');
+        // H-03: Write cachedAt timestamp for expiry tracking
+        await fs.writeFile(cachePath, JSON.stringify({ ...answers, cachedAt: new Date().toISOString() }, null, 2), 'utf8');
       } catch (err) { }
     }
 
-    const reportPath = outputFile || path.join(process.cwd(), 'gatebreaker-roadmap.html');
-    const targetReportPath = path.isAbsolute(reportPath) ? reportPath : path.resolve(process.cwd(), reportPath);
+    // H-04: Validate --output path before writing
+    const reportPath = outputFile
+      ? validateOutputPath(outputFile)
+      : path.join(process.cwd(), 'gatebreaker-roadmap.html');
+
+    if (outputFile && !reportPath) {
+      console.log(pc.red('Error: --output path must be within the current working directory (no traversal allowed).'));
+      return;
+    }
+    const targetReportPath = reportPath;
 
     try {
       const track = getTrackDetails(answers.targetRole);
@@ -1595,14 +1733,20 @@ ${profileText}
       console.log(pc.cyan(`  File URL:      file:///${targetReportPath.replace(/\\/g, '/')}\n`));
 
       console.log(pc.yellow('Launching roadmap in your browser...'));
-      const launchCmd = process.platform === 'win32' ? `start "" "${targetReportPath}"` :
-                        process.platform === 'darwin' ? `open "${targetReportPath}"` :
-                        `xdg-open "${targetReportPath}"`;
-      exec(launchCmd, (error) => {
-        if (error) {
-          console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
-        }
-      });
+      // C-01: execFile with arg array — no shell injection risk
+      if (process.platform === 'win32') {
+        execFile('cmd.exe', ['/c', 'start', '', targetReportPath], (error) => {
+          if (error) console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
+        });
+      } else if (process.platform === 'darwin') {
+        execFile('open', [targetReportPath], (error) => {
+          if (error) console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
+        });
+      } else {
+        execFile('xdg-open', [targetReportPath], (error) => {
+          if (error) console.log(pc.red(`  Could not launch browser automatically: ${error.message}`));
+        });
+      }
     } catch (err) {
       console.error(pc.red('Error generating roadmap: ' + err.message));
     }
@@ -1619,6 +1763,9 @@ ${profileText}
     try {
       const cacheContent = await fs.readFile(cachePath, 'utf8');
       const cachedData = JSON.parse(cacheContent);
+      // H-03: Validate schema + 30-day expiry before trusting
+      if (!validateCache(cachedData)) throw new Error('Cache invalid or expired');
+
       console.log(pc.yellow(`Found answers from your last session (Target: ${pc.bold(cachedData.targetRole)}).\n`));
 
       const confirmChoice = await prompts({
@@ -1636,13 +1783,14 @@ ${profileText}
         console.log(''); // spacer
       }
     } catch (e) {
-      // Cache doesn't exist or is invalid, proceed to questionnaire
+      // Cache doesn't exist, invalid schema, or expired — proceed to questionnaire
     }
 
     if (!useCached) {
       answers = await runIntakeFlow();
       try {
-        await fs.writeFile(cachePath, JSON.stringify(answers, null, 2), 'utf8');
+        // H-03: Persist cachedAt timestamp for expiry tracking
+        await fs.writeFile(cachePath, JSON.stringify({ ...answers, cachedAt: new Date().toISOString() }, null, 2), 'utf8');
       } catch (e) {
         // Silent catch for cache write errors
       }
@@ -1869,7 +2017,12 @@ ${diagnosticResponse}
 
       let targetReportPath;
       if (outputFile) {
-        targetReportPath = path.isAbsolute(outputFile) ? outputFile : path.resolve(process.cwd(), outputFile);
+        // H-04: Validate --output stays within cwd
+        targetReportPath = validateOutputPath(outputFile);
+        if (!targetReportPath) {
+          console.log(pc.red('Error: --output path must be within the current working directory (no traversal allowed).'));
+          return;
+        }
         await fs.writeFile(targetReportPath, reportContent, 'utf8');
         console.log(pc.green(`\n✓ Report saved successfully to:\n  ${targetReportPath}\n`));
       } else {

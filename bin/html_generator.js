@@ -47,30 +47,55 @@ const expertAvatars = {
 };
 
 /**
- * Converts markdown text to simple HTML elements
+ * Escapes HTML special characters to prevent XSS (C-02)
+ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Converts markdown text to HTML.
+ * C-02: Raw input is HTML-escaped first so LLM payloads cannot inject scripts.
+ * M-04: Consecutive list lines are accumulated into a single <ul>/<ol> block.
  */
 function parseMarkdown(md) {
   if (!md) return '';
-  let html = md;
-  // Headers
+  // C-02: Escape raw input — all subsequent regex replacements inject hardcoded tags only
+  let html = escapeHtml(md);
+  // Headers (tag names are hardcoded; $1 capture is already escaped)
   html = html.replace(/^### (.*$)/gim, '<h3 class="expert-section-title">$1</h3>');
   html = html.replace(/^#### (.*$)/gim, '<h4 class="expert-section-sub">$1</h4>');
   html = html.replace(/^## (.*$)/gim, '<h2 class="expert-main-title">$1</h2>');
-  // Blockquotes
-  html = html.replace(/^\> (.*$)/gim, '<blockquote class="expert-quote">$1</blockquote>');
+  // Blockquotes — after escaping, leading > becomes &gt;
+  html = html.replace(/^&gt; (.*$)/gim, '<blockquote class="expert-quote">$1</blockquote>');
   // Bold
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  // Lists
-  html = html.replace(/^\s*\-\s*(.*$)/gim, '<li>$1</li>');
-  // Wrap list items
-  html = html.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
-  // Clean double wrapping of <ul>
-  html = html.replace(/<\/ul>\s*<ul>/g, '');
+  // M-04: Accumulate consecutive unordered list lines into one <ul> block
+  html = html.replace(/((?:^[ \t]*-[ \t]+.*(?:\r?\n|$))+)/gm, (block) => {
+    const items = block.split('\n')
+      .filter(line => /^[ \t]*-[ \t]+/.test(line))
+      .map(line => `<li>${line.replace(/^[ \t]*-[ \t]+/, '')}</li>`);
+    return `<ul>${items.join('')}</ul>\n`;
+  });
+  // Numbered lists
+  html = html.replace(/((?:^\d+\.[ \t]+.*(?:\r?\n|$))+)/gm, (block) => {
+    const items = block.split('\n')
+      .filter(line => /^\d+\.[ \t]+/.test(line))
+      .map(line => `<li>${line.replace(/^\d+\.[ \t]+/, '')}</li>`);
+    return `<ol>${items.join('')}</ol>\n`;
+  });
   // Line breaks / paragraphs
   html = html.split('\n\n').map(p => {
-    if (p.trim().startsWith('<h') || p.trim().startsWith('<blockquote') || p.trim().startsWith('<ul') || p.trim().startsWith('<li')) {
-      return p;
-    }
+    p = p.trim();
+    if (!p) return '';
+    if (p.startsWith('<h') || p.startsWith('<blockquote') || p.startsWith('<ul') ||
+        p.startsWith('<ol') || p.startsWith('<li')) return p;
     return `<p>${p.replace(/\n/g, '<br>')}</p>`;
   }).join('\n');
   return html;
@@ -509,15 +534,15 @@ export async function generateComparisonHTML(profileData, targetRole, results, o
       <div class="sidebar-section-title">Profile Under Review</div>
       <div class="profile-meta-item">
         <div class="profile-meta-label">Selected Profile</div>
-        <div class="profile-meta-val">${profileName}</div>
+        <div class="profile-meta-val">${escapeHtml(profileName)}</div>
       </div>
       <div class="profile-meta-item">
         <div class="profile-meta-label">Target Security Role</div>
-        <div class="profile-meta-val">${targetRole}</div>
+        <div class="profile-meta-val">${escapeHtml(targetRole)}</div>
       </div>
       <div class="profile-meta-item">
         <div class="profile-meta-label">Resume / Input Telemetry</div>
-        <div class="profile-cv-box">${profileContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        <div class="profile-cv-box">${escapeHtml(profileContent)}</div>
       </div>
     </div>
 

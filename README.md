@@ -229,6 +229,7 @@ Gatebreaker channels specific mentors based on your diagnosis:
 
 | Version | Key Changes |
 | :--- | :--- |
+| **1.1.3** | Hardened security defenses against Command Injection and Stored XSS in simulated dashboards. Restructured salary references to INR LPA and integrated 6 India-specific salary hacks. Streamlined global installation commands for both Gemini and Claude Code, and fixed dynamic PDF parser named export instantiations. |
 | **1.1.2** | Optimized packaging boundaries. Refined `.gitignore` and `.npmignore` to exclude local environment configurations (`.env`), IDE settings (`.gemini/`, `.vscode/`, `.idea/`), local testing samples, and static landing page source files (`index.html`, `styles.css`) from published packages to minimize size and protect developer environment secrets. |
 | **1.1.1** | Resolved Windows path double-quote parsing bugs. Added native PDF extraction support via Mehmet Kozan's modern `PDFParse` ESM library. Expanded `compare` simulator command to support all 13 LLM API providers. Shifted defaults to high-performance, low-latency models (`gemini-1.5-flash`, `gpt-4o-mini`, `claude-3-5-haiku`). Decoupled child browser spawning from CLI process exits, and added global linking (`npm link`) support. |
 | **1.1.0** | Redesigned landing page with premium styles, version history table, FAQ schema, and copy-command toast. |

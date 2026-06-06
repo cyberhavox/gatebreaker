@@ -298,6 +298,8 @@ Your GitHub is your resume for offensive security and engineering roles.
 
 | Your Tier | Primary Platforms | Secondary | Hidden Market |
 |---|---|---|---|
+| **Tier 1 (0–2 yrs / Entry)** | LinkedIn, Indeed, Shine.com, TimesJobs | Apna, Cutshort, TryHackMe leaderboard | BSides attendance, OWASP chapter meetups |
+| **Tier 2 (2–5 yrs / Mid)** | LinkedIn, Hirist.com, Instahyre | CyberSecJobs, Wellfound, Indeed | Bug bounty profiles (HackerOne/Bugcrowd), CTF rankings |
 | **Tier 3 (5–8 yrs)** | LinkedIn, Wellfound, Hired | CyberSecJobs, SANS Board | Conference networking |
 | **Tier 4 (8–12 yrs)** | LinkedIn, iimjobs, Hired | Direct CISO outreach | Executive search firms |
 | **Tier 5–6 (12+ yrs)** | LinkedIn, iimjobs, referrals | Executive headhunters | Board networks, ISACA |
